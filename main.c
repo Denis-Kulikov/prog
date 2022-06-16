@@ -1,48 +1,13 @@
 #include "library.h"
 #include "cformat.h"
 
+#include "operation.c"
 #include "check.c"
 #include "code.c"
-
-#define CHECK_END_SYMBOL(s, code) \
-if (!*s) { \
-    code = code->next_code; \
-    if (code == NULL) \
-        return; \
-    s = code->symbol; \
-}
-
-#define CHECK_BEGIN_SYMBOL(s, code) \
-if (s == &(code->symbol[0]) - 1) { \
-    code = code->previous_code; \
-    s = code->symbol; \
-    for (; *s != '\0'; s++); \
-    s--; \
-}
-
-#define NEXT_SYMBOL(s, code) \
-s++; \
-CHECK_END_SYMBOL(s, code);
-
-#define PREVIOUS_SYMBOL(s, code) \
-s--; \
-CHECK_BEGIN_SYMBOL(s, code);
 
 #define AVAILABLE_SYMBOL(i) command[i] == ' ' || command[i] == TAB || command[i] == '{' || \
             command[i] == '}' || command[i] == ';' || command[i] == '(' || \
             command[i] == ')' || command[i] == TAB || command[i] == '\n'
-
-int scmp_command(char* str1, char* str2)
-{
-
-    while (*str2) {
-        if (*str1 != *str2)
-            return 1;
-        str1++;    
-        str2++;    
-    }
-    return 0;
-}
 
 void chack_new_line(fragment_code* code)
 {
@@ -82,75 +47,23 @@ void chack_new_line(fragment_code* code)
     }
 }
 
-void delete_symbol(fragment_code* code, char* pos)
-{
-    char *cur = pos, *next = cur + 1;
-
-    while (*cur) {
-        *cur = *next;
-        cur++;
-        next++;
-    }
-}
-
-void delete_13(fragment_code* code)
-{
-    char* s;
-    int i = 0;
-    while (code != NULL) {
-        s = &(code->symbol[0]);
-        while (*s != '\0') {
-            while (*s == 13) {
-                delete_symbol(code, s);
-                printf("%d ", i);
-            }
-            i++;
-            s++;
-        }
-        code = code->next_code;
-    } 
-}
-
-void delet_tab(fragment_code** code, char** s) {
-    fragment_code* cur_code = *code;
-    char* cur_s = *s;
-    if (*cur_s == '\n') { 
-        // past_symbol(cur_code, cur_s, '*');
-        NEXT_SYMBOL(cur_s, cur_code);   
-        while (*cur_s == '\n') { // пока переходы
-            NEXT_SYMBOL(cur_s, cur_code);   
-        }
-
-        while (*cur_s == ' ' && cur_code != NULL) { // если пробел
-            delete_symbol(cur_code, cur_s); // удаляем его
-            CHECK_END_SYMBOL(cur_s, cur_code);
-        }
-    }
-}
-
 void clean_tab(fragment_code* code)
 {
-    char* s;
-    while (code != NULL) {
-        s = code->symbol;
-        while (*s) {
-            delet_tab(&code, &s);
-            // if (*s == '\n') { 
-            //     past_symbol(code, s, '*');
-            //     NEXT_SYMBOL(s, code);   
-            //     while (*s == '\n') { // пока переходы
-            //         NEXT_SYMBOL(s, code);   
-            //     }
-
-            //     while (*s == ' ' && code != NULL) { // если пробел
-            //         delete_symbol(code, s); // удаляем его
-            //         CHECK_END_SYMBOL(s, code);
-            //     }
-            // }
-
-            NEXT_SYMBOL(s, code);
-        }
-        code = code->next_code;
+    char* s = code->symbol;
+    while (1) {
+        // printf("%c", *s);
+        if (*s == '\n') {
+            while (*s == '\n') // нужно ли это?
+                if (!next_symbol(&code, &s))
+                    return;
+            while (*s == ' ' || *s == TAB) {
+                delete_symbol(code, s);
+                if (!(*s) && (!next_symbol(&code, &s)))
+                    return;
+            }
+        } else
+            if (!next_symbol(&code, &s))
+                break;
     }
 }
 
@@ -194,25 +107,26 @@ char *s;
 
 int chec_q(fragment_code* code, char* s)
 {
-    char *start_symbol = get_start_symbol(code);
+    // char *start_symbol = get_start_symbol(code);
     int count = 0;
 
     if (*(s + 1) == '\'' && *(s - 1) == '\'')
         return 0;
 
-    PREVIOUS_SYMBOL(s, code);
-    while (s != start_symbol) { 
+    while (previous_symbol(&code, &s)) { 
         if (*s == '\"') {
-            PREVIOUS_SYMBOL(s, code);
-            if (s == start_symbol)
+            if (previous_symbol(&code, &s))
                 break;
+            // if (s == start_symbol)
+            //     break;
             if (*s != '\\')
                 count++;
         }
         
-        PREVIOUS_SYMBOL(s, code);
-        if (s == start_symbol)
-            break;
+        // if (previous_code(s, code))
+        //     break;
+        // if (s == start_symbol)
+        //     break;
     }
 
     return (count + 1) % 2;
@@ -224,14 +138,14 @@ int check_str(fragment_code* code, char* s)
     while (*s != '\n') {
         if (*s == '/') {
             if (chec_q(code, s)) {
-                PREVIOUS_SYMBOL(s, code);
+                previous_symbol(&code, &s);
                 if (s == start_symbol - 1)
                     break;
                 if (*s == '/')
                     return 0;
             }
         }
-        PREVIOUS_SYMBOL(s, code);
+        previous_symbol(&code, &s);
         if (s == start_symbol - 1)
             break;
     }
@@ -245,11 +159,11 @@ int check_comment(fragment_code* code, char* s)
     if (check_str(code, s))
         return 1;
 
-    PREVIOUS_SYMBOL(s, code);
+    previous_symbol(&code, &s);
     while (s != start_symbol) { 
         switch (*s) {
             case '/':
-                PREVIOUS_SYMBOL(s, code);
+                previous_symbol(&code, &s);
                 if (s == start_symbol)
                     break;
                 if (*s == '*')
@@ -257,7 +171,8 @@ int check_comment(fragment_code* code, char* s)
                         return 1;
                 break;
             case '*':
-                PREVIOUS_SYMBOL(s, code);
+                next_symbol(&code, &s);
+                // PREVIOUS_SYMBOL(s, code);
                 if (s == start_symbol) 
                     break;
                 printf("%c\n", *s);
@@ -267,10 +182,11 @@ int check_comment(fragment_code* code, char* s)
                     else 
                         return 0;
                 }
+                previous_symbol(&code, &s);
                 break;
         }
 
-        PREVIOUS_SYMBOL(s, code);
+        previous_symbol(&code, &s);
         if (s == start_symbol)
             break;
     }
@@ -283,11 +199,11 @@ int check_init(fragment_code* code, char* s)
     char *start_symbol = get_start_symbol(code);
     int count = 0;
     if (*s == '{') {
-        PREVIOUS_SYMBOL(s, code);
+        previous_symbol(&code, &s);
         if (s == start_symbol)
             return 0;
         while (*s == ' ') {
-            PREVIOUS_SYMBOL(s, code);
+            previous_symbol(&code, &s);
             if (s == start_symbol)
                 return 0;
         }
@@ -295,8 +211,8 @@ int check_init(fragment_code* code, char* s)
             return 0;
     } else {
         count++;
-        while (*s != '\n') {
-            PREVIOUS_SYMBOL(s, code);
+        while (count) {
+            previous_symbol(&code, &s);
 
             if (*s == '{')
                 count--;
@@ -308,7 +224,7 @@ int check_init(fragment_code* code, char* s)
         }
 
         while (*s == ' ') {
-            PREVIOUS_SYMBOL(s, code);
+            previous_symbol(&code, &s);
             if (s == start_symbol - 1)
                 return 1;
         }
@@ -322,11 +238,11 @@ int check_init(fragment_code* code, char* s)
 void check_tab(fragment_code* code, char* s, int* tab)
 {
     // if (*s == 123 && chec_q(code, s) && check_comment(code, s) && check_init(code, s))
-    if (*s == 123 && chec_q(code, s) && check_init(code, s))
+    if (*s == 123 && chec_q(code, s))
         (*tab)++;
 
     // if (*s == 125 && chec_q(code, s) && check_comment(code, s) && check_init(code, s))
-    if (*s == 125 && chec_q(code, s) && check_init(code, s))
+    if (*s == 125 && chec_q(code, s))
         (*tab)--;
 }
 
@@ -336,11 +252,11 @@ void add_tab(fragment_code* code)
     int tab = 0, i, count_p = 0;;
     while (code != NULL) {
         s = &(code->symbol[0]);
-        while (*s != '\0') {
+        while (*s) {
             check_tab(code, s, &tab);
             if (*s == 10) {
                 while (*s == 10)
-                    NEXT_SYMBOL(s, code);
+                    next_symbol(&code, &s);
                 if (*s == '}')  
                     tab--;
 
@@ -348,14 +264,14 @@ void add_tab(fragment_code* code)
                     count_p++;
                 for (i = 0; i < tab; i++) {
                     past_symbol(code, s, TAB);
-                    NEXT_SYMBOL(s, code);
+                    next_symbol(&code, &s);
                 }
             }
             if (count_p) {
                 tab++;
                 count_p = 0;
             }
-            NEXT_SYMBOL(s, code);
+            next_symbol(&code, &s);
         }
         code = code->next_code;
     }
@@ -368,21 +284,21 @@ void add_tab_after_command(fragment_code** _code, char** _s)
     int brk = 0;
     if (chec_q(code, s)) {
         while (*s == ' ' || *s == TAB) 
-            NEXT_SYMBOL(s, code);
+            next_symbol(&code, &s);
     
         do {
             if (*s == '(')
                 brk++;
             if (*s == ')')
                 brk--;
-                 NEXT_SYMBOL(s,code);
+            next_symbol(&code, &s);
         } while (brk != 0);
         while (*s != '\n') {
             if (*s == '{' || *s == ';')
                 return;
-            NEXT_SYMBOL(s,code);
+            next_symbol(&code, &s);
         }
-        NEXT_SYMBOL(s,code);
+        next_symbol(&code, &s);
         past_symbol(code, s, TAB);
     }
 }
@@ -421,7 +337,7 @@ void cicl(fragment_code* code)
                 if (!scmp_command(cur_command, _if)) 
                     add_tab_after_command(&code, &s);
             }
-            NEXT_SYMBOL(s, code);
+            next_symbol(&code, &s);
         }
     code = code->next_code;
     }
@@ -450,10 +366,10 @@ void cformat(fragment_code* code)
     clean_tab(code);
     write_code(code);
     
-    getchar();
+    // getchar();
 
-    add_tab(code);
-    cicl(code);
+    // add_tab(code);
+    // cicl(code);
 }
 
 int main() {
