@@ -263,17 +263,21 @@ int main() {
 	int mas[][] = {{1, 2, 3}, {1, 2, 3}};
 	/* {
 
-		FILE* file; */
-		file = fopen(name_file, "r");
-
-		fragment_code* code = malloc(sizeof(fragment_code));
-		code->previous_code = NULL;
-
-		assert(read_code(file, code) == RIGHT);
-		printf("\n\ncformat:\n");
-		cformat(code);
-
-		write_code(code);
-
-		return 0;
+		FILE* file; 
 	}
+	*/
+
+	// // {
+	file = fopen(name_file, "r");
+
+	fragment_code* code = malloc(sizeof(fragment_code));
+	code->previous_code = NULL;
+
+	assert(read_code(file, code) == RIGHT);
+	printf("\n\ncformat:\n");
+	cformat(code);
+
+	write_code(code);
+
+	return 0;
+}

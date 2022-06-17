@@ -263,7 +263,11 @@ int main() {
     int mas[][] = {{1, 2, 3}, {1, 2, 3}};
     /* {
 
-    FILE* file; */
+    FILE* file; 
+        }
+    */
+
+    // }
     file = fopen(name_file, "r");
 
     fragment_code* code = malloc(sizeof(fragment_code));
