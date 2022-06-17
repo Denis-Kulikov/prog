@@ -15,8 +15,7 @@ void chack_new_line(fragment_code* code){
     int count; 
     while (code != NULL) {
         s = &(code->symbol[0]);
-        while (*s != '\0') {
-            if (*s == ';') {
+        while (*s != '\0') {if (*s == ';') {
                 back_s = s - 1;
                 count = 0;
                 while (*back_s != '\n' && *back_s != NEW_LINE && *back_s != '(') {
