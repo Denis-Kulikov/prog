@@ -7,27 +7,6 @@
 #include "check.c"
 #include "code.c"
 
-// void moving_figur(fragment_code* code)
-// {
-//     char* s = code->symbol;
-//     int tab = 0, save,  change = 0;
-
-//     while (1) {
-//         save = tab
-//         check_tab(code, s, &tab);
-//         change = tab - save;
-
-//         if (change > 0) {
-
-//         }
-
-//         if (!next_symbol(&code, &s))
-//             return;
-//     }
-// }
-
-
-
 void check_op(fragment_code* code) // ###
 {
     char *s = code->symbol;
@@ -113,8 +92,7 @@ int main() {
     file = fopen(name_file, "r");
 
     fragment_code* code = malloc(sizeof(fragment_code));
-    code->previous_code = NULL;
-    
+
     assert(read_code(file, code) == RIGHT);
     cformat(code);
 
