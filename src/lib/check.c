@@ -1,19 +1,14 @@
 void check_tab(fragment_code* code, char* s, int* tab)
 {
-    // if (*s == 123 && chec_q(code, s) && check_comment(code, s) && check_init(code, s))
-    if (*s == 123 && chec_q(code, s) && check_comment(code, s)) {
+    if (*s == 123 && chec_q(code, s) && check_comment(code, s))
         (*tab)++;
-    }
 
-    // if (*s == 125 && chec_q(code, s) && check_comment(code, s) && check_init(code, s))
-    if (*s == 125 && chec_q(code, s) && check_comment(code, s)) {
+    if (*s == 125 && chec_q(code, s) && check_comment(code, s))
         (*tab)--;
-    }
 }
 
 int chec_q(fragment_code* code, char* s)
 {
-    // char *start_symbol = get_start_symbol(code);
     int count = 0;
 
     if (*(s + 1) == '\'' && *(s - 1) == '\'')

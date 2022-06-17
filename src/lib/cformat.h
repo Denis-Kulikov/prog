@@ -1,10 +1,11 @@
 void cicl(fragment_code* code);
-void write_code(fragment_code* code);
+void write_code(fragment_code* code, FILE* file);
 void cformat(fragment_code* code);
 void clean_tab(fragment_code* code);
 
 void add_tab(fragment_code* code);
 void add_tab_after_command(fragment_code** _code, char** _s);
+void add_tab_after_case(fragment_code* code, char* s);
 
 void check_tab(fragment_code* code, char* s, int* tab);
 int chec_q(fragment_code* code, char* s);

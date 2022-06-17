@@ -1,7 +1,7 @@
 void add_tab(fragment_code* code)
 {
     char *s = code->symbol, *helper;
-    int tab = 0, i, save, change, count, str = 1;
+    int tab = 0, i, save, change, count;
 
     while (1) {
         count = 0;
@@ -159,7 +159,8 @@ void add_tab_after_command(fragment_code** _code, char** _s)
         if (!next_symbol(&code, &s))
             return;
     }
-
+    if (*s != '\n')
+        past_symbol(code, s, '\n');
     if (!next_symbol(&code, &s))
         return;
 

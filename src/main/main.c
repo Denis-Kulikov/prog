@@ -7,48 +7,43 @@
 #include "check.c"
 #include "code.c"
 
-void check_op(fragment_code* code) // ###
+void check_op(fragment_code* code)
 {
     char *s = code->symbol;
+    fragment_code* back_c = code;
     char *back_s;
-    int count, i = 1; 
     while (1) {
         if (*s == ';' && chec_q(code, s) && check_comment(code, s)) {
             back_s = s;
-            if (!previous_symbol(&code, &back_s) || check_parity(code, s)) {
+            if (!previous_symbol(&back_c, &back_s) || !check_parity(code, s)) {
                 if (!next_symbol(&code, &s))
                     return;
                 continue;
             }
 
-            count = 0;
             while (1) {
-                if (*back_s == ';' || *back_s == '{' || *back_s == '}') {
-                    count++;
+                if (*back_s == '\n')
+                    break;
+                if ((*back_s == ';' || *back_s == '{' || *back_s == '}') &&
+                    chec_q(back_c, back_s) && check_comment(back_c, back_s)) {
+                    next_symbol(&back_c, &back_s);
+                    past_symbol(back_c, back_s, '\n');
+                    next_symbol(&code, &s);
                     break;
                 }
-
-                if (*back_s != '\n' || !previous_symbol(&code, &back_s))
+                if (!previous_symbol(&back_c, &back_s))
                     break;
             }
-            if (count) {
-                // printf("%d\n", i);
-                next_symbol(&code, &back_s);
-                past_symbol(code, back_s, '\n');
-                // next_symbol(&code, &s);
-            }
+
         }
-        
         
         if (!next_symbol(&code, &s))
             break;
-        if (*s == '\n')
-            i++;
     }
 }
 
-int main() {
-    char name_file[] = "test.c";
+int main(int argc, char *argv[]) {
+    char* name_file = *(argv + 1);
 
     FILE* file;
     file = fopen(name_file, "r");
@@ -57,8 +52,10 @@ int main() {
 
     assert(read_code(file, code) == RIGHT);
     cformat(code);
+    fclose(file);
 
-    write_code(code);
+    file = fopen(name_file, "w");
+    write_code(code, file);
 
     return 0;
 }
