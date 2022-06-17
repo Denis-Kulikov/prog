@@ -35,8 +35,7 @@ void chack_new_line(fragment_code* code){
                             count_s++;
                     }
                     if (!check_parity(back_s + 1, code) && (count_s != 0)) {
-                        past_symbol(code, back_s + 1, '\n');
-                        s++;
+                        past_symbol(code, back_s + 1, '\n');s++;
                     }}}
             s++;
         }
@@ -366,6 +365,8 @@ void cformat(fragment_code* code)
 
 int main() {
     char name_file[] = "test.c";
+
+    int array[][] = {{5, 6}, {3, 4}, {1, 2}};
 
     FILE* file;
     file = fopen(name_file, "r");
