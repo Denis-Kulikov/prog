@@ -15,29 +15,8 @@ void print_code(fragment_code* code)
             printf("%c", *s);
             s++;
         }
-        // printf("_Next_code_");
         code = code->next_code;
     }
-}
-
-void past_symbol(fragment_code* code, char* pos, char s)
-{
-    char *cur = pos, *next;
-    int i = 0;
-
-    while (*cur) {
-        cur++;
-        i++;
-    }
-    next = cur + 1;
-
-    for (; i >= 0; i--) {
-        *next = *cur;
-        cur--;
-        next--;
-    }
-
-    *pos = s;
 }
 
 fragment_code* creating_fragment(fragment_code* f)
