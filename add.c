@@ -97,77 +97,58 @@ void add_tab_after_command(fragment_code** _code, char** _s)
     fragment_code* code = *_code;
     char* s = *_s;
     int brk = 0;
-    if (chec_q(code, s)) {
-        while (*s == ' ' || *s == TAB) 
-            if (!next_symbol(&code, &s))
-                return;
-    
-        do {
-            if (*s == '(')
-                brk++;
-            if (*s == ')')
-                brk--;
-            if (!next_symbol(&code, &s))
-                return;
-        } while (brk != 0);
-        while (*s != '\n') {
-            if (*s == '{' || *s == ';')
-                if (!check_comment(code, s) || chec_q(code, s))
-                    return;
-            if (!next_symbol(&code, &s))
-                return;
-        }
+
+    if (!next_symbol(&code, &s) || !chec_q(code, s) || !check_comment(code, s))
+        return;
+
+    while (*s == ' ' || *s == TAB) 
         if (!next_symbol(&code, &s))
             return;
-        past_symbol(code, s, TAB);
-    }
-}
 
-/*
-void add_tab_after_command(fragment_code** _code, char** _s)
-{
-    fragment_code* code = *_code;
-    char* s = *_s;
-    int brk = 0;
-    if (chec_q(code, s)) {
-        while (*s == ' ' || *s == TAB) 
-            if (!next_symbol(&code, &s))
-                return;
-    
-        do {
-            if (*s == '(')
-                brk++;
-            if (*s == ')')
-                brk--;
-            if (!next_symbol(&code, &s))
-                return;
-        } while (brk != 0);
-        while (1) {
-            if (*s == '{' || *s == ';')
-                if (!check_comment(code, s))
-                    return;
-            if (!next_symbol(&code, &s))
-                return;
-            // if (*s == '/' && next_symbol(&code, &s))
-            //     if (*s == '/') {
-            //         while (*s != '\n') 
-            //             if (!next_symbol(&code, &s))
-            //                 return;
-            //     } else
-
-
-            if (*s != ' ' && *s != TAB)
-                past_symbol(code, s, '\n');
-
-            if (*s == '\n')
-                break;
-        }
+    do {
+        if (*s == '(' && chec_q(code, s))
+            brk++;
+        if (*s == ')' && chec_q(code, s))
+            brk--;
         if (!next_symbol(&code, &s))
             return;
-        past_symbol(code, s, TAB);
+    } while (brk != 0);
+
+    while (1) {
+        if (*s == '\n')
+            break;
+
+        if (*s == '/') {
+            if (!next_symbol(&code, &s) || (*s != '*' && *s != '/')) 
+                return;
+            else {
+                if (*s == '*') {
+                    while (1) {
+                        if (*s == '\n')
+                            return;
+                        if (*s == '*') {
+                            previous_symbol(&code, &s);
+                            if (*s == '/')
+                                break;
+                            next_symbol(&code, &s);
+                        }
+                    }
+                } else 
+                    while (*s != '\n') 
+                        next_symbol(&code, &s);
+            }
+        }
+
+        if (*s == '{' || *s == ';')
+            return;
+        if (*s != ' ' && *s != TAB)
+            break;
+        if (!next_symbol(&code, &s))
+            return;
     }
-    // while (*s == ' ' || *s == TAB)
-    //     next_symbol(&code, &s);
-    
+
+    if (!next_symbol(&code, &s))
+        return;
+
+    past_symbol(code, s, TAB);
 }
-*/

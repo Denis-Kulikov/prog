@@ -10,6 +10,9 @@ int check_shift_cicle(fragment_code* code, char* s, int i)
     for (int j = 0; j < i; j++)
         previous_symbol(&code, &s);
 
+    if (*s == '\n')
+        return 0;
+
     while (*s == ' ' || *s == TAB) {
         if (!previous_symbol(&code, &s))
             break;
@@ -62,7 +65,7 @@ void cicl(fragment_code* code)
             cur_command = command + 5;
             if (!scmp_command(cur_command, _while)) {
                 add_tab_after_command(&code, &s);
-                printf("%d) %s\n", i, command);
+                // printf("%d) %s\n", i, command);
                 // i++;
             }
         }
@@ -71,7 +74,7 @@ void cicl(fragment_code* code)
             cur_command = command + 7;
             if (!scmp_command(cur_command, _for)) {
                 add_tab_after_command(&code, &s);
-                printf("%d) %s\n", i, command);
+                // printf("%d) %s\n", i, command);
                 // i++;
             }
         }
@@ -79,13 +82,15 @@ void cicl(fragment_code* code)
         if (AVAILABLE_SYMBOL(7)) {
             cur_command = command + 8;
             if (!scmp_command(cur_command, _if)) {
-                if (check_shift_cicle(code, s, 2))
+                if (check_shift_cicle(code, s, 2)) {
                     next_symbol(&code, &s);
+                    printf("%d\n", i);
+                }
                 add_tab_after_command(&code, &s);
-                printf("%d)", i);
-                for (int k = 0; k < COMMAND_L; k++)
-                    printf("%c=", command[k]);
-                printf("\n");
+                // printf("%d)", i);
+                // for (int k = 0; k < COMMAND_L; k++)
+                //     printf("%c=", command[k]);
+                // printf("\n");
                 // i++;
             }
         }
@@ -125,6 +130,6 @@ void cformat(fragment_code* code)
 
     // check_new_line(code);
     // check_op(code);
-    add_tab(code);
     cicl(code);
+    add_tab(code);
 }
