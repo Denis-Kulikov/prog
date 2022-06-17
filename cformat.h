@@ -10,6 +10,7 @@ void check_tab(fragment_code* code, char* s, int* tab);
 int chec_q(fragment_code* code, char* s);
 int check_str(fragment_code* code, char* s);
 int check_comment(fragment_code* code, char* s); 
+int check_init(fragment_code* code, char* s);
 
 int previous_symbol(fragment_code** code, char** s);
 int next_symbol(fragment_code** code, char** s);

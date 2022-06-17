@@ -63,7 +63,7 @@ void cicl(fragment_code* code)
 
         if (AVAILABLE_SYMBOL(4)) {
             cur_command = command + 5;
-            if (!scmp_command(cur_command, _while)) {
+            if (!scmp_command(cur_command, _while) && chec_q(code, s) && check_comment(code, s)) {
                 add_tab_after_command(&code, &s);
                 // printf("%d) %s\n", i, command);
                 // i++;
@@ -72,7 +72,7 @@ void cicl(fragment_code* code)
 
         if (AVAILABLE_SYMBOL(6)) {
             cur_command = command + 7;
-            if (!scmp_command(cur_command, _for)) {
+            if (!scmp_command(cur_command, _for) && chec_q(code, s) && check_comment(code, s)) {
                 add_tab_after_command(&code, &s);
                 // printf("%d) %s\n", i, command);
                 // i++;
@@ -81,7 +81,7 @@ void cicl(fragment_code* code)
 
         if (AVAILABLE_SYMBOL(7)) {
             cur_command = command + 8;
-            if (!scmp_command(cur_command, _if)) {
+            if (!scmp_command(cur_command, _if) && chec_q(code, s) && check_comment(code, s)) {
                 if (check_shift_cicle(code, s, 2)) {
                     next_symbol(&code, &s);
                     printf("%d\n", i);

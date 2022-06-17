@@ -10,9 +10,7 @@
             command[i] == ')' || command[i] == TAB || command[i] == '\n'
 
 void chack_new_line(fragment_code* code){
-    char *s;
-    char *back_s;
-    int count; 
+    char *s;char *back_s;int count; 
     while (code != NULL) {
         s = &(code->symbol[0]);
         while (*s != '\0') {if (*s == ';') {

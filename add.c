@@ -1,7 +1,7 @@
 void add_tab(fragment_code* code)
 {
     char *s = code->symbol, *helper;
-    int tab = 0, i, save, change, count;
+    int tab = 0, i, save, change, count, str = 1;
 
     while (1) {
         count = 0;
@@ -50,9 +50,10 @@ void add_tab(fragment_code* code)
                         return;
                 }
             }
-        } else
+        }
 
-        if (change && (change == 1 && tab != 1)) {
+        // if (change && ((tab == 1) ^ (change != 1))) {
+        if (change) {
             helper = s;
             if (!next_symbol(&code, &helper))
                 return;
@@ -66,8 +67,22 @@ void add_tab(fragment_code* code)
                     break;
             }
         }
+        
+        if (*s == '=') {// проверка инициации массива
+            if (check_init(code, s)) {
+                printf("%d\n", str);
+                while (1) {
+                    // printf("#");
+                    if (*s == ';' && chec_q(code, s) && check_comment(code, s))
+                        break;
+                    if (!next_symbol(&code, &s))
+                        return;
+                }
+            }
+        }
 
-        if (*s == '\n') {
+        if (*s == '\n') { // расставление табуляций
+            str++;
             while (*s == '\n')
                 if (!next_symbol(&code, &s))
                     return;

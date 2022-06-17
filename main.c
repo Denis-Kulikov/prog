@@ -11,78 +11,40 @@ void check_op(fragment_code* code) // ###
 {
     char *s = code->symbol;
     char *back_s;
-    int count; 
+    int count, i = 1; 
     while (1) {
-        if (*s == ';') {
+        if (*s == ';' && chec_q(code, s) && check_comment(code, s)) {
             back_s = s;
-            if (!previous_symbol(&code, &s))
-                return;
+            if (!previous_symbol(&code, &back_s) || check_parity(code, s)) {
+                if (!next_symbol(&code, &s))
+                    return;
+                continue;
+            }
+
             count = 0;
-            while (*back_s != '\n' && *back_s != '(') {
-                if (*back_s == ';' || *back_s == '{' || *back_s == '}' || *back_s == ')') {
+            while (1) {
+                if (*back_s == ';' || *back_s == '{' || *back_s == '}') {
                     count++;
                     break;
                 }
-                if (!previous_symbol(&code, &s))
+
+                if (*back_s != '\n' || !previous_symbol(&code, &back_s))
                     break;
             }
             if (count) {
-                int count_s  = 0;
-                back_s = s - 1;
-                while (*back_s != ';' && *back_s != '{' && *back_s != '}' && *back_s != ')') {
-                    back_s--;
-                    if (*back_s != ' ' || *back_s != TAB)
-                        count_s++;
-                }
-                if (!check_parity(back_s + 1, code) && (count_s != 0)) {
-                    past_symbol(code, back_s + 1, '\n');
-                    s++;
-                }
+                printf("%d\n", i);
+                next_symbol(&code, &back_s);
+                past_symbol(code, back_s, '\n');
+                // next_symbol(&code, &s);
             }
         }
-        s++;
+        
+        
+        if (!next_symbol(&code, &s))
+            break;
+        if (*s == '\n')
+            i++;
     }
-}
-
-int check_init(fragment_code* code, char* s)
-{
-    char *start_symbol = get_start_symbol(code);
-    int count = 0;
-    if (*s == '{') {
-        previous_symbol(&code, &s);
-        if (s == start_symbol)
-            return 0;
-        while (*s == ' ') {
-            previous_symbol(&code, &s);
-            if (s == start_symbol)
-                return 0;
-        }
-        if (*s == '=')
-            return 0;
-    } else {
-        count++;
-        while (count) {
-            previous_symbol(&code, &s);
-
-            if (*s == '{')
-                count--;
-            if (*s == '{')
-                count++;
-            
-            if (s == start_symbol)
-                return 0;
-        }
-
-        while (*s == ' ') {
-            previous_symbol(&code, &s);
-            if (s == start_symbol - 1)
-                return 1;
-        }
-        if (*s == '=')
-            return 0;
-    }
-    
-    return 1;
 }
 
 int main() {
