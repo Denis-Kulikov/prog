@@ -153,38 +153,36 @@ int check_str(fragment_code* code, char* s)
 
 int check_comment(fragment_code* code, char* s)
 {
+    int comment_count = 0;
     if (!check_str(code, s))
         return 0;
 
     if (!previous_symbol(&code, &s))
         return 1;
-/*    while (1) { 
+
+    while (1) { 
         switch (*s) {
             case '/':
                 if (!previous_symbol(&code, &s))
                     break;
                 if (*s == '*')
                     if (chec_q(code, s))
-                        return 1;
+                        comment_count--;
                 break;
             case '*':
                 if (!previous_symbol(&code, &s))
                     break;
-                if (*s == '/') {
+                if (*s == '/') 
                     if (chec_q(code, s)) 
-                        return 1;
-                    else 
-                        return 0;
-                }
-                if (!previous_symbol(&code, &s))
-                    break;
+                        comment_count++;
+                break;
         }
 
         if (!previous_symbol(&code, &s))
             break;
     }
-*/
-    return 1;
+
+    return (comment_count + 1) % 2;
 }
 
 int check_init(fragment_code* code, char* s)
@@ -253,7 +251,7 @@ void add_tab(fragment_code* code)
                     if (!next_symbol(&code, &s))
                         return;
 
-                if (*s == '}' && chec_q(code, s)) { // ###
+                if (*s == '}' && chec_q(code, s) && check_comment(code, s)) { // ###
                     for (i = 0; i < tab - 1; i++) 
                         past_symbol(code, s, TAB);
                     while (*s == TAB)
@@ -367,6 +365,7 @@ void cformat(fragment_code* code)
 
     add_tab(code);
     cicl(code);
+    check_op(code);
 }
 
 int main() {
