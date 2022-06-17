@@ -12,7 +12,7 @@ void print_code(fragment_code* code)
     while (code != NULL) {
         s = code->symbol;
         while (*s) {
-            printf("%c", *s);
+            // printf("%c", *s);
             s++;
         }
         code = code->next_code;

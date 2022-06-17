@@ -9,20 +9,20 @@ void add_tab(fragment_code* code)
         check_tab(code, s, &tab);
         change = tab - save;
 
-        if (change == 1) {
-            if (tab == 1) {
+        if (change == 1) { // {
+            if (tab == 1) { // первый
                 helper = s;
-                while (*helper != ')' && previous_symbol(&code, &helper)) {
+                while (*helper != ')' && previous_symbol(&code, &helper)) 
                     if (*helper == ' ' || *helper == TAB || *helper == '\n')
                         delete_symbol(code, helper);
-                }
+                
                 if (!next_symbol(&code, &helper))
                     return;
                 past_symbol(code, helper, '\n');
                 if (!next_symbol(&code, &helper) || !next_symbol(&code, &helper))
                     return;
                 s = helper;
-            } else {
+            } else { // не первый и перед циклом
                 helper = s;
                 while (1) {
                     if (!previous_symbol(&code, &helper))
@@ -36,24 +36,23 @@ void add_tab(fragment_code* code)
                     }
                 }
 
-                if (count) {
+                if (count) { // не первый и перед циклом
                     while (1) {
-                        previous_symbol(&code, &s);
+                        previous_symbol(&code, &s); // назад пока не функция
                         if (*s == ')')
                             break;
                         else
-                            delete_symbol(code, s);
+                            delete_symbol(code, s); // удаляем отступы
                     }
                     next_symbol(&code, &s);
-                    past_symbol(code, s, ' ');
+                    past_symbol(code, s, ' '); // пробел после цикла
                     if (!next_symbol(&code, &s) || !next_symbol(&code, &s))
                         return;
                 }
             }
         }
 
-        // if (change && ((tab == 1) ^ (change != 1))) {
-        if (change) {
+        if (change == -1 || (change == 1 && tab != 1)) {
             helper = s;
             if (!next_symbol(&code, &helper))
                 return;
@@ -67,10 +66,10 @@ void add_tab(fragment_code* code)
                     break;
             }
         }
-        
+
         if (*s == '=') {// проверка инициации массива
             if (check_init(code, s)) {
-                printf("%d\n", str);
+                // printf("%d\n", str);
                 while (1) {
                     // printf("#");
                     if (*s == ';' && chec_q(code, s) && check_comment(code, s))
@@ -81,8 +80,7 @@ void add_tab(fragment_code* code)
             }
         }
 
-        if (*s == '\n') { // расставление табуляций
-            str++;
+        if (*s == '\n') {
             while (*s == '\n')
                 if (!next_symbol(&code, &s))
                     return;

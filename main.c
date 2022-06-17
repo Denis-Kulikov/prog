@@ -32,7 +32,7 @@ void check_op(fragment_code* code) // ###
                     break;
             }
             if (count) {
-                printf("%d\n", i);
+                // printf("%d\n", i);
                 next_symbol(&code, &back_s);
                 past_symbol(code, back_s, '\n');
                 // next_symbol(&code, &s);

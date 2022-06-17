@@ -1,6 +1,4 @@
-
-
-#define AVAILABLE_SYMBOL(i) command[i] == ' ' || command[i] == TAB || command[i] == '{' || \
+#define AVAILABLE_SYMBOL(i, command) command[i] == ' ' || command[i] == TAB || command[i] == '{' || \
             command[i] == '}' || command[i] == ';' || command[i] == '(' || \
             command[i] == ')' || command[i] == TAB || command[i] == '\n'
 
@@ -61,7 +59,7 @@ void cicl(fragment_code* code)
             command[j] = command[j + 1];
         command[COMMAND_L - 1] = *s; // получение символов 
 
-        if (AVAILABLE_SYMBOL(4)) {
+        if (AVAILABLE_SYMBOL(4, command)) {
             cur_command = command + 5;
             if (!scmp_command(cur_command, _while) && chec_q(code, s) && check_comment(code, s)) {
                 add_tab_after_command(&code, &s);
@@ -70,7 +68,7 @@ void cicl(fragment_code* code)
             }
         }
 
-        if (AVAILABLE_SYMBOL(6)) {
+        if (AVAILABLE_SYMBOL(6, command)) {
             cur_command = command + 7;
             if (!scmp_command(cur_command, _for) && chec_q(code, s) && check_comment(code, s)) {
                 add_tab_after_command(&code, &s);
@@ -79,7 +77,7 @@ void cicl(fragment_code* code)
             }
         }
 
-        if (AVAILABLE_SYMBOL(7)) {
+        if (AVAILABLE_SYMBOL(7, command)) {
             cur_command = command + 8;
             if (!scmp_command(cur_command, _if) && chec_q(code, s) && check_comment(code, s)) {
                 if (check_shift_cicle(code, s, 2)) {
@@ -100,6 +98,47 @@ void cicl(fragment_code* code)
     }
 }
 
+void clean_else(fragment_code* code)
+{
+    char save[6], *cur; // текущая команда
+    char _else[] = "else";
+    char* s = code->symbol;
+    int j;
+
+    for (j = 0; j < 6; j++) // зануляется
+        save[j] = '\0';
+
+    while (1) {
+        for (j = 0; j <= 6 - 2; j++) // сдвиг влево
+            save[j] = save[j + 1];
+        save[6 - 1] = *s; // получение символов 
+
+        if (AVAILABLE_SYMBOL(0, save)) {
+            cur = save + 1;
+            if (!scmp_command(cur, _else) && chec_q(code, s) && check_comment(code, s)) {
+                while (*s != TAB) // пропускаем else
+                    previous_symbol(&code, &s);
+
+                while (*s == TAB || *s == ' ' || *s == '\n') { // пока пропуски
+                    delete_symbol(code, s);
+                    if (!previous_symbol(&code, &s)) {
+                        next_symbol(&code, &s);
+                        next_symbol(&code, &s);
+                        break;
+                    }   
+                }
+
+                next_symbol(&code, &s);
+                // past_symbol(code, s, ' ');
+                for (int i = 0; i < 6; i++)
+                    next_symbol(&code, &s);
+            }
+        }
+        if (!next_symbol(&code, &s))
+            break;
+    }
+}
+
 void write_code(fragment_code* code)
 {
     FILE* in;
@@ -113,7 +152,6 @@ void write_code(fragment_code* code)
             s++;
         }
         code = code->next_code;
-        // fprintf(in, "_NEXT_");
     }
     fclose(in);
 }
@@ -129,7 +167,8 @@ void cformat(fragment_code* code)
     // getchar();
 
     // check_new_line(code);
-    // check_op(code);
+    check_op(code);
     cicl(code);
     add_tab(code);
+    clean_else(code);
 }
