@@ -1,3 +1,5 @@
+#include "library.h"
+
 void add_tab(fragment_code* code)
 {
     char *s = code->symbol, *helper;

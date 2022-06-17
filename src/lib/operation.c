@@ -1,3 +1,5 @@
+#include "library.h"
+
 int previous_symbol(fragment_code** code, char** s)
 {
     (*s)--;

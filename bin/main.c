@@ -1,18 +1,10 @@
-#include "library.h"
-#include "cformat.h"
-
-#include "cformat.c"
-#include "add.c"
-#include "operation.c"
-#include "check.c"
-#include "code.c"
-
+#include "lib/library.h"
+#include "lib/cformat.h"
 void check_op(fragment_code* code)
 {
 	char *s = code->symbol;
 	fragment_code* back_c = code;
-	char *back_s;
-	while (1) {
+	char *back_s;while (1) {
 		if (*s == ';' && chec_q(code, s) && check_comment(code, s)) {
 			back_s = s;
 			if (!previous_symbol(&back_c, &back_s) || !check_parity(code, s)) {
@@ -34,18 +26,14 @@ void check_op(fragment_code* code)
 				if (!previous_symbol(&back_c, &back_s))
 					break;
 			}
-
 		}
-
 		if (!next_symbol(&code, &s))
 			break;
 	}
 }
-
-int main()
+int main(int argc, char *argv[])
 {
-	char name_file[] = "test.c";
-
+	char* name_file = *(argv + 1);
 	FILE* file;
 	file = fopen(name_file, "r");
 
@@ -53,8 +41,10 @@ int main()
 
 	assert(read_code(file, code) == RIGHT);
 	cformat(code);
+	fclose(file);
 
-	write_code(code);
+	file = fopen(name_file, "w");
+	write_code(code, file);
 
 	return 0;
 }

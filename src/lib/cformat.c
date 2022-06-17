@@ -1,3 +1,5 @@
+#include "library.h"
+
 #define AVAILABLE_SYMBOL(i, command) command[i] == ' ' || command[i] == TAB || command[i] == '{' || \
             command[i] == '}' || command[i] == ';' || command[i] == '(' || \
             command[i] == ')' || command[i] == TAB || command[i] == '\n'

@@ -1,3 +1,5 @@
+#include "library.h"
+
 char* get_start_symbol(fragment_code* code)
 {
     while (code->previous_code != NULL) 

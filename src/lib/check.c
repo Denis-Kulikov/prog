@@ -1,3 +1,5 @@
+#include "library.h"
+
 void check_tab(fragment_code* code, char* s, int* tab)
 {
     if (*s == 123 && chec_q(code, s) && check_comment(code, s))

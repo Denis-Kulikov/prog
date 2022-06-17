@@ -1,12 +1,5 @@
-#include "library.h"
-#include "cformat.h"
-
-#include "cformat.c"
-#include "add.c"
-#include "operation.c"
-#include "check.c"
-#include "code.c"
-
+#include "lib/library.h"
+#include "lib/cformat.h"
 void check_op(fragment_code* code)
 {
     char *s = code->symbol;
@@ -46,7 +39,10 @@ int main(int argc, char *argv[]) {
     char* name_file = *(argv + 1);
 
     FILE* file;
-    file = fopen(name_file, "r");
+    if (!file = fopen(name_file, "r")) {
+        printf("Файл с названием \"%s\" не найден.\n", name_file);
+        return 0;
+    }
 
     fragment_code* code = malloc(sizeof(fragment_code));
 

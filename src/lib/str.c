@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 int sspn(char* str)
 {
     char error[] = {'\\', '/', ':', '*', '?', '<', '>', '|', '\0'}, *e_pos;
