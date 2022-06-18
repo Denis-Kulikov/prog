@@ -231,18 +231,18 @@ void add_tab_after_case(fragment_code* code, char* s)
                 continue;                
             }
 
-            if (!scmp_command(command + 3, _default)) {
-                for (int i = 0; i <= 7; i++)
-                    previous_symbol(&code, &s);
-                while (*s == ' ' || *s == '\n' || *s == TAB) {
-                    delete_symbol(code, s);
-                    previous_symbol(&code, &s);
-                }
-                past_symbol(code, s, TAB);
-                past_symbol(code, s, '\n');
-                for (int i = 0; i < 8; i++)
-                    next_symbol(&code, &s);
-            }
+            // if (!scmp_command(command + 3, _default)) {
+            //     for (int i = 0; i <= 7; i++)
+            //         previous_symbol(&code, &s);
+            //     while (*s == ' ' || *s == '\n' || *s == TAB) {
+            //         delete_symbol(code, s);
+            //         previous_symbol(&code, &s);
+            //     }
+            //     past_symbol(code, s, TAB);
+            //     past_symbol(code, s, '\n');
+            //     for (int i = 0; i < 8; i++)
+            //         next_symbol(&code, &s);
+            // }
         }
 
         if (!next_symbol(&code, &s))

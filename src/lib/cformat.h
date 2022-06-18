@@ -1,4 +1,4 @@
-void cicl(fragment_code* code);
+void cycle(fragment_code* code);
 void write_code(fragment_code* code, FILE* file);
 void cformat(fragment_code* code);
 void clean_tab(fragment_code* code);

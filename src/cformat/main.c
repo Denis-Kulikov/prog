@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     file = fopen(name_file, "w");
     write_code(code, file);
 
-    clean(code);
+    // clean(code);
 
     return 0;
 }

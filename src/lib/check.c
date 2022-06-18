@@ -38,7 +38,6 @@ int chec_q(fragment_code* code, char* s)
 
 int check_str(fragment_code* code, char* s) 
 {
-    
     while (*s != '\n') {
         if (*s == '/')
             if (chec_q(code, s)) {

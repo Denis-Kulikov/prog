@@ -5,7 +5,7 @@
             command[i] == ')' || command[i] == TAB || command[i] == '\n'
 
 
-int check_shift_cicle(fragment_code* code, char* s, int i)
+int check_shift_cycle(fragment_code* code, char* s, int i)
 {
     for (int j = 0; j < i; j++)
         previous_symbol(&code, &s);
@@ -44,7 +44,7 @@ void clean_tab(fragment_code* code)
     }
 }
 
-void cicl(fragment_code* code)
+void cycle(fragment_code* code)
 {
     char command[COMMAND_L], *cur_command; // текущая команда
     char _while[] = "while", _for[] = "for", _if[] = "if", _switch[] = "switch";
@@ -64,7 +64,7 @@ void cicl(fragment_code* code)
         if (AVAILABLE_SYMBOL(4, command)) {
             cur_command = command + 5;
             if (!scmp_command(cur_command, _while) && chec_q(code, s) && check_comment(code, s)) {
-                if (check_shift_cicle(code, s, 5))
+                if (check_shift_cycle(code, s, 5))
                     next_symbol(&code, &s);
                 add_tab_after_command(&code, &s);
             }
@@ -73,7 +73,7 @@ void cicl(fragment_code* code)
         if (AVAILABLE_SYMBOL(6, command)) {
             cur_command = command + 7;
             if (!scmp_command(cur_command, _for) && chec_q(code, s) && check_comment(code, s)) {
-                if (check_shift_cicle(code, s, 3)) 
+                if (check_shift_cycle(code, s, 3)) 
                     next_symbol(&code, &s);
                 add_tab_after_command(&code, &s);
             }
@@ -82,7 +82,7 @@ void cicl(fragment_code* code)
         if (AVAILABLE_SYMBOL(7, command)) {
             cur_command = command + 8;
             if (!scmp_command(cur_command, _if) && chec_q(code, s) && check_comment(code, s)) {
-                if (check_shift_cicle(code, s, 2))
+                if (check_shift_cycle(code, s, 2))
                     next_symbol(&code, &s);
                 add_tab_after_command(&code, &s);
             }
@@ -91,9 +91,9 @@ void cicl(fragment_code* code)
         if (AVAILABLE_SYMBOL(3, command)) {
             cur_command = command + 4;
             if (!scmp_command(cur_command, _switch) && chec_q(code, s) && check_comment(code, s)) 
-                if (check_shift_cicle(code, s, 6))
+                if (check_shift_cycle(code, s, 6))
                     next_symbol(&code, &s);
-                add_tab_after_case(code, s);
+            add_tab_after_case(code, s);
         }
 
         if (!next_symbol(&code, &s))
@@ -160,7 +160,7 @@ void cformat(fragment_code* code)
 {
     clean_tab(code);
     check_op(code);
-    cicl(code);
-    add_tab(code);
-    clean_else(code);
+    cycle(code);
+    // add_tab(code);
+    // clean_else(code);
 }

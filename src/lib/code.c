@@ -1,22 +1,13 @@
 #include "library.h"
 
-char* get_start_symbol(fragment_code* code)
-{
-    while (code->previous_code != NULL) 
-        code = code->previous_code;
-
-    return &(code->symbol[0]);
-}
-
 void print_code(fragment_code* code)
 {
     char* s;
     while (code != NULL) {
         s = code->symbol;
-        while (*s) {
-            // printf("%c", *s);
+        while (*s)
             s++;
-        }
+        
         code = code->next_code;
     }
 }
@@ -39,20 +30,20 @@ fragment_code* creating_fragment(fragment_code* f)
     return f->next_code;
 }
 
-void clean(fragment_code* code)
-{
-    while (code->next_code)
-        code = code->next_code;
+// void clean(fragment_code* code)
+// {
+//     while (code->next_code)
+//         code = code->next_code;
     
-    fragment_code* delete = code;
-    code = code->previous_code;
+//     fragment_code* delete = code;
+//     code = code->previous_code;
 
-    while (delete) {
-        free(delete);
-        delete = code;
-        code = code->previous_code;
-    }
-}
+//     while (delete) {
+//         free(delete);
+//         delete = code;
+//         code = code->previous_code;
+//     }
+// }
 
 int read_code(FILE* f, fragment_code* code)
 {
