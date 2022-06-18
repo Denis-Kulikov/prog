@@ -13,6 +13,7 @@ int check_str(fragment_code* code, char* s);
 int check_comment(fragment_code* code, char* s); 
 int check_init(fragment_code* code, char* s);
 int check_parity(fragment_code* code, char* s);
+void check_op(fragment_code* code);
 
 int previous_symbol(fragment_code** code, char** s);
 int next_symbol(fragment_code** code, char** s);

@@ -61,6 +61,7 @@ void past_symbol(fragment_code* code, char* pos, char s)
         cur++;
         i++;
     }
+    
     next = cur + 1;
 
     for (; i >= 0; i--) {

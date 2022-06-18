@@ -44,87 +44,6 @@ void clean_tab(fragment_code* code)
     }
 }
 
-void add_tab_after_case(fragment_code* code, char* s)
-{
-    while (*s != '{')
-        if (!next_symbol(&code, &s))
-            return;
-    if (!next_symbol(&code, &s))
-        return;
-    char command[COMMAND_L]; // текущая команда
-    char _case[] = "case", _default[] = "default";
-    int j, tab = 1;
-
-    for (j = 0; j < COMMAND_L; j++) // зануляется
-        command[j] = '\0';
-
-    while (tab) {
-        if ((*s == '}' || *s == '{')) {
-            check_tab(code, s, &tab);
-            if (!tab) {
-                previous_symbol(&code, &s);
-                delete_symbol(code, s);
-                return;
-            }
-        }
-
-        if (*s == '\n') {
-            if (!next_symbol(&code, &s))
-                return;
-            past_symbol(code, s, TAB);
-        }
-
-        for (j = 0; j <= COMMAND_L - 2; j++) // сдвиг влево
-            command[j] = command[j + 1];
-        command[COMMAND_L - 1] = *s; // получение символов 
-
-        if (chec_q(code, s) && check_comment(code, s)) {
-            if (!scmp_command(command + 6, _case)) {
-                for (int i = 0; i < 3; i++)
-                    previous_symbol(&code, &s);
-                while (*s == ' ' || *s == '\n' || *s == TAB) {
-                    delete_symbol(code, s);
-                    previous_symbol(&code, &s);
-                }
-                previous_symbol(&code, &s);
-                delete_symbol(code, s); // удаление табуляции
-
-                while (1) { // пропуск до двоеточия
-                    next_symbol(&code, &s);
-                    if (*s == ':' && chec_q(code, s) && check_comment(code, s)) 
-                        break;
-                }
-
-                if (!next_symbol(&code, &s))
-                    return;
-
-                while (*s == ' ' || *s == TAB) // проверка после :
-                    if (!next_symbol(&code, &s))
-                        return;
-                if (*s != '\n')
-                    past_symbol(code, s, '\n');
-                continue;                
-            }
-
-            if (!scmp_command(command + 3, _default)) {
-                for (int i = 0; i <= 7; i++)
-                    previous_symbol(&code, &s);
-                while (*s == ' ' || *s == '\n' || *s == TAB) {
-                    delete_symbol(code, s);
-                    previous_symbol(&code, &s);
-                }
-                past_symbol(code, s, TAB);
-                past_symbol(code, s, '\n');
-                for (int i = 0; i < 8; i++)
-                    next_symbol(&code, &s);
-            }
-        }
-
-        if (!next_symbol(&code, &s))
-            return;
-    }
-}
-
 void cicl(fragment_code* code)
 {
     char command[COMMAND_L], *cur_command; // текущая команда
@@ -145,44 +64,36 @@ void cicl(fragment_code* code)
         if (AVAILABLE_SYMBOL(4, command)) {
             cur_command = command + 5;
             if (!scmp_command(cur_command, _while) && chec_q(code, s) && check_comment(code, s)) {
+                if (check_shift_cicle(code, s, 5))
+                    next_symbol(&code, &s);
                 add_tab_after_command(&code, &s);
-                // printf("%d) %s\n", i, command);
-                // i++;
             }
         }
 
         if (AVAILABLE_SYMBOL(6, command)) {
             cur_command = command + 7;
             if (!scmp_command(cur_command, _for) && chec_q(code, s) && check_comment(code, s)) {
+                if (check_shift_cicle(code, s, 3)) 
+                    next_symbol(&code, &s);
                 add_tab_after_command(&code, &s);
-                // printf("%d) %s\n", i, command);
-                // i++;
             }
         }
 
         if (AVAILABLE_SYMBOL(7, command)) {
             cur_command = command + 8;
             if (!scmp_command(cur_command, _if) && chec_q(code, s) && check_comment(code, s)) {
-                if (check_shift_cicle(code, s, 2)) {
+                if (check_shift_cicle(code, s, 2))
                     next_symbol(&code, &s);
-                    printf("%d\n", i);
-                }
                 add_tab_after_command(&code, &s);
-                // printf("%d)", i);
-                // for (int k = 0; k < COMMAND_L; k++)
-                //     printf("%c=", command[k]);
-                // printf("\n");
-                // i++;
             }
         }
 
         if (AVAILABLE_SYMBOL(3, command)) {
             cur_command = command + 4;
             if (!scmp_command(cur_command, _switch) && chec_q(code, s) && check_comment(code, s)) 
-                if (check_shift_cicle(code, s, 6)) {
-                    add_tab_after_case(code, s);
+                if (check_shift_cicle(code, s, 6))
                     next_symbol(&code, &s);
-                }
+                add_tab_after_case(code, s);
         }
 
         if (!next_symbol(&code, &s))
@@ -248,7 +159,6 @@ void write_code(fragment_code* code, FILE* file)
 void cformat(fragment_code* code)
 {
     clean_tab(code);
-    // write_code(code);
     check_op(code);
     cicl(code);
     add_tab(code);

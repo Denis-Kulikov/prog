@@ -168,3 +168,84 @@ void add_tab_after_command(fragment_code** _code, char** _s)
 
     past_symbol(code, s, TAB);
 }
+
+void add_tab_after_case(fragment_code* code, char* s)
+{
+    while (*s != '{')
+        if (!next_symbol(&code, &s))
+            return;
+    if (!next_symbol(&code, &s))
+        return;
+    char command[COMMAND_L]; // текущая команда
+    char _case[] = "case", _default[] = "default";
+    int j, tab = 1;
+
+    for (j = 0; j < COMMAND_L; j++) // зануляется
+        command[j] = '\0';
+
+    while (tab) {
+        if ((*s == '}' || *s == '{')) {
+            check_tab(code, s, &tab);
+            if (!tab) {
+                previous_symbol(&code, &s);
+                delete_symbol(code, s);
+                return;
+            }
+        }
+
+        if (*s == '\n') {
+            if (!next_symbol(&code, &s))
+                return;
+            past_symbol(code, s, TAB);
+        }
+
+        for (j = 0; j <= COMMAND_L - 2; j++) // сдвиг влево
+            command[j] = command[j + 1];
+        command[COMMAND_L - 1] = *s; // получение символов 
+
+        if (chec_q(code, s) && check_comment(code, s)) {
+            if (!scmp_command(command + 6, _case)) {
+                for (int i = 0; i < 3; i++)
+                    previous_symbol(&code, &s);
+                while (*s == ' ' || *s == '\n' || *s == TAB) {
+                    delete_symbol(code, s);
+                    previous_symbol(&code, &s);
+                }
+                previous_symbol(&code, &s);
+                delete_symbol(code, s); // удаление табуляции
+
+                while (1) { // пропуск до двоеточия
+                    next_symbol(&code, &s);
+                    if (*s == ':' && chec_q(code, s) && check_comment(code, s)) 
+                        break;
+                }
+
+                if (!next_symbol(&code, &s))
+                    return;
+
+                while (*s == ' ' || *s == TAB) // проверка после :
+                    if (!next_symbol(&code, &s))
+                        return;
+                if (*s != '\n')
+                    past_symbol(code, s, '\n');
+                continue;                
+            }
+
+            if (!scmp_command(command + 3, _default)) {
+                for (int i = 0; i <= 7; i++)
+                    previous_symbol(&code, &s);
+                while (*s == ' ' || *s == '\n' || *s == TAB) {
+                    delete_symbol(code, s);
+                    previous_symbol(&code, &s);
+                }
+                past_symbol(code, s, TAB);
+                past_symbol(code, s, '\n');
+                for (int i = 0; i < 8; i++)
+                    next_symbol(&code, &s);
+            }
+        }
+
+        if (!next_symbol(&code, &s))
+            return;
+    }
+}

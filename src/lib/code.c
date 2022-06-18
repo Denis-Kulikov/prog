@@ -39,6 +39,21 @@ fragment_code* creating_fragment(fragment_code* f)
     return f->next_code;
 }
 
+void clean(fragment_code* code)
+{
+    while (code->next_code)
+        code = code->next_code;
+    
+    fragment_code* delete = code;
+    code = code->previous_code;
+
+    while (delete) {
+        free(delete);
+        delete = code;
+        code = code->previous_code;
+    }
+}
+
 int read_code(FILE* f, fragment_code* code)
 {
     int cout_tab[] = {0, 0};

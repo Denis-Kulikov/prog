@@ -1,5 +1,5 @@
-APP_NAME = main
-TEST_NAME = main-test
+APP_NAME = cformat
+TEST_NAME = cformat-test
 LIB_NAME = lib
 
 CFLAGS = -w
