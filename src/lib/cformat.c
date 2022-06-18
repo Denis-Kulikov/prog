@@ -28,6 +28,7 @@ int check_shift_cycle(fragment_code* code, char* s, int i)
 void clean_tab(fragment_code* code)
 {
     char* s = code->symbol;
+    
     while (1) {
         if (*s == '\n') {
             while (*s == '\n') // нужно ли это?
@@ -90,10 +91,11 @@ void cycle(fragment_code* code)
 
         if (AVAILABLE_SYMBOL(3, command)) {
             cur_command = command + 4;
-            if (!scmp_command(cur_command, _switch) && chec_q(code, s) && check_comment(code, s)) 
+            if (!scmp_command(cur_command, _switch) && chec_q(code, s) && check_comment(code, s)) {
                 if (check_shift_cycle(code, s, 6))
                     next_symbol(&code, &s);
-            add_tab_after_case(code, s);
+                add_tab_after_case(code, s);
+            }
         }
 
         if (!next_symbol(&code, &s))
@@ -132,7 +134,6 @@ void clean_else(fragment_code* code)
                 }
 
                 next_symbol(&code, &s);
-                // past_symbol(code, s, ' ');
                 for (int i = 0; i < 6; i++)
                     next_symbol(&code, &s);
             }
@@ -158,9 +159,17 @@ void write_code(fragment_code* code, FILE* file)
 
 void cformat(fragment_code* code)
 {
-    clean_tab(code);
     check_op(code);
+    printf("\n#check_op\n");
+    print_code(code);
+    getchar();
+    clean_tab(code);
+    printf("\n#clean_tab\n");
+    print_code(code);
+    getchar();
     cycle(code);
-    // add_tab(code);
-    // clean_else(code);
+    printf("\n#cycle\n");
+    print_code(code);
+    getchar();
+    add_tab(code);
 }

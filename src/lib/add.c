@@ -24,6 +24,16 @@ void add_tab(fragment_code* code)
                 if (!next_symbol(&code, &helper) || !next_symbol(&code, &helper))
                     return;
                 s = helper;
+                while (1) {
+                    if (*s != ' ' && *s != TAB)
+                        if (*s != '\n') {
+                            past_symbol(code, s, '\n');
+                            break;
+                        } else
+                            break;
+                    if (!next_symbol(&code, &s))
+                        break;
+                }
             } else { // не первый и перед циклом
                 helper = s;
                 while (1) {
@@ -55,6 +65,19 @@ void add_tab(fragment_code* code)
         }
 
         if (change == -1 || (change == 1 && tab != 1)) {
+            if (change == -1) {
+                helper = s;
+                previous_symbol(&code, &helper);
+                while (1) {
+                    if (*helper != ' ' && *helper != TAB)
+                        break;
+                    previous_symbol(&code, &helper);
+                }
+                if (*helper != '\n') {
+                    past_symbol(code, s, '\n');
+                    next_symbol(&code, &s);
+                }
+            }
             helper = s;
             if (!next_symbol(&code, &helper))
                 return;
@@ -71,9 +94,7 @@ void add_tab(fragment_code* code)
 
         if (*s == '=') {// проверка инициации массива
             if (check_init(code, s)) {
-                // printf("%d\n", str);
                 while (1) {
-                    // printf("#");
                     if (*s == ';' && chec_q(code, s) && check_comment(code, s))
                         break;
                     if (!next_symbol(&code, &s))
@@ -87,7 +108,7 @@ void add_tab(fragment_code* code)
                 if (!next_symbol(&code, &s))
                     return;
 
-            if (*s == '}' && chec_q(code, s) && check_comment(code, s)) { // ###
+            if (*s == '}' && chec_q(code, s) && check_comment(code, s)) {
                 for (i = 0; i < tab - 1; i++) 
                     past_symbol(code, s, TAB);
                 while (*s == TAB)
@@ -231,18 +252,32 @@ void add_tab_after_case(fragment_code* code, char* s)
                 continue;                
             }
 
-            // if (!scmp_command(command + 3, _default)) {
-            //     for (int i = 0; i <= 7; i++)
-            //         previous_symbol(&code, &s);
-            //     while (*s == ' ' || *s == '\n' || *s == TAB) {
-            //         delete_symbol(code, s);
-            //         previous_symbol(&code, &s);
-            //     }
-            //     past_symbol(code, s, TAB);
-            //     past_symbol(code, s, '\n');
-            //     for (int i = 0; i < 8; i++)
-            //         next_symbol(&code, &s);
-            // }
+            if (!scmp_command(command + 3, _default)) {
+                for (int i = 0; i < 6; i++)
+                    previous_symbol(&code, &s);
+                while (*s == ' ' || *s == '\n' || *s == TAB) {
+                    delete_symbol(code, s);
+                    previous_symbol(&code, &s);
+                }
+                previous_symbol(&code, &s);
+                delete_symbol(code, s); // удаление табуляции
+
+                while (1) { // пропуск до двоеточия
+                    next_symbol(&code, &s);
+                    if (*s == ':' && chec_q(code, s) && check_comment(code, s)) 
+                        break;
+                }
+
+                if (!next_symbol(&code, &s))
+                    return;
+
+                while (*s == ' ' || *s == TAB) // проверка после :
+                    if (!next_symbol(&code, &s))
+                        return;
+                if (*s != '\n')
+                    past_symbol(code, s, '\n');
+                continue;  
+            }
         }
 
         if (!next_symbol(&code, &s))

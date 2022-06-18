@@ -129,6 +129,20 @@ void check_op(fragment_code* code)
     fragment_code* back_c = code;
     char *back_s;
     while (1) {
+        if (*s == '=') {// проверка инициации массива
+            if (check_init(code, s)) {
+                while (1) {
+                    if (*s == ';' && chec_q(code, s) && check_comment(code, s)) {
+                        if (!next_symbol(&code, &s))
+                            return;
+                        break;
+                    }
+                    if (!next_symbol(&code, &s))
+                        return;
+                }
+            }
+        }
+        
         if (*s == ';' && chec_q(code, s) && check_comment(code, s)) {
             back_s = s;
             if (!previous_symbol(&back_c, &back_s) || !check_parity(code, s)) {
