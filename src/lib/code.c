@@ -1,4 +1,5 @@
 #include "library.h"
+#include "cformat.h"
 
 void print_code(fragment_code* code)
 {

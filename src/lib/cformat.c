@@ -1,29 +1,5 @@
 #include "library.h"
-
-#define AVAILABLE_SYMBOL(i, command) command[i] == ' ' || command[i] == TAB || command[i] == '{' || \
-            command[i] == '}' || command[i] == ';' || command[i] == '(' || \
-            command[i] == ')' || command[i] == TAB || command[i] == '\n'
-
-
-int check_shift_cycle(fragment_code* code, char* s, int i)
-{
-    for (int j = 0; j < i; j++)
-        previous_symbol(&code, &s);
-
-    if (*s == '\n')
-        return 0;
-
-    while (*s == ' ' || *s == TAB) {
-        if (!previous_symbol(&code, &s))
-            break;
-        if (*s == '\n')
-            return 0;
-    }
-    next_symbol(&code, &s);
-    past_symbol(code, s, '\n');
-
-    return 1; // если перенесли на новую строку
-}
+#include "cformat.h"
 
 void clean_tab(fragment_code* code)
 {
@@ -48,7 +24,7 @@ void clean_tab(fragment_code* code)
 void cycle(fragment_code* code)
 {
     char command[COMMAND_L], *cur_command; // текущая команда
-    char _while[] = "while", _for[] = "for", _if[] = "if", _switch[] = "switch";
+    char _while[] = "while", _for[] = "for", _if[] = "if", _switch[] = "switch", _do[] = "do";
     char* s = code->symbol;
     int j, i = 1;
 
@@ -64,16 +40,17 @@ void cycle(fragment_code* code)
 
         if (AVAILABLE_SYMBOL(4, command)) {
             cur_command = command + 5;
-            if (!scmp_command(cur_command, _while) && chec_q(code, s) && check_comment(code, s)) {
+            if (!scmp_command(cur_command, _while) && check_q(code, s) && check_comment(code, s)) {
                 if (check_shift_cycle(code, s, 5))
                     next_symbol(&code, &s);
                 add_tab_after_command(&code, &s);
+                check_do_while(&code, &s);
             }
         }
 
         if (AVAILABLE_SYMBOL(6, command)) {
             cur_command = command + 7;
-            if (!scmp_command(cur_command, _for) && chec_q(code, s) && check_comment(code, s)) {
+            if (!scmp_command(cur_command, _for) && check_q(code, s) && check_comment(code, s)) {
                 if (check_shift_cycle(code, s, 3)) 
                     next_symbol(&code, &s);
                 add_tab_after_command(&code, &s);
@@ -82,7 +59,7 @@ void cycle(fragment_code* code)
 
         if (AVAILABLE_SYMBOL(7, command)) {
             cur_command = command + 8;
-            if (!scmp_command(cur_command, _if) && chec_q(code, s) && check_comment(code, s)) {
+            if (!scmp_command(cur_command, _if) && check_q(code, s) && check_comment(code, s)) {
                 if (check_shift_cycle(code, s, 2))
                     next_symbol(&code, &s);
                 add_tab_after_command(&code, &s);
@@ -91,10 +68,19 @@ void cycle(fragment_code* code)
 
         if (AVAILABLE_SYMBOL(3, command)) {
             cur_command = command + 4;
-            if (!scmp_command(cur_command, _switch) && chec_q(code, s) && check_comment(code, s)) {
+            if (!scmp_command(cur_command, _switch) && check_q(code, s) && check_comment(code, s)) {
                 if (check_shift_cycle(code, s, 6))
                     next_symbol(&code, &s);
                 add_tab_after_case(code, s);
+            }
+        }
+
+        if ((AVAILABLE_SYMBOL(7, command)) && available_end(code, s)) {
+            cur_command = command + 8;
+            if (!scmp_command(cur_command, _do) && check_q(code, s) && check_comment(code, s)) {
+                if (check_shift_cycle(code, s, 2))
+                    next_symbol(&code, &s);
+                add_tab_after_command(&code, &s);
             }
         }
 
@@ -120,7 +106,7 @@ void clean_else(fragment_code* code)
 
         if (AVAILABLE_SYMBOL(0, save)) {
             cur = save + 1;
-            if (!scmp_command(cur, _else) && chec_q(code, s) && check_comment(code, s)) {
+            if (!scmp_command(cur, _else) && check_q(code, s) && check_comment(code, s)) {
                 while (*s != TAB) // пропускаем else
                     previous_symbol(&code, &s);
 
@@ -143,6 +129,29 @@ void clean_else(fragment_code* code)
     }
 }
 
+/*
+void tab_after_figur(code)
+{
+    char* s = code->symbol;
+    
+    while (1) {
+        if (*s == '\n') {
+            while (*s == '\n') // нужно ли это?
+                if (!next_symbol(&code, &s))
+                    return;
+            while (*s == ' ' || *s == TAB) {
+                delete_symbol(code, s);
+                if (!(*s) && (!next_symbol(&code, &s)))
+                    return;
+            }
+        } else
+            if (!next_symbol(&code, &s))
+                break;
+    }
+}
+*/
+
+
 void write_code(fragment_code* code, FILE* file)
 {
     char* s;
@@ -157,19 +166,96 @@ void write_code(fragment_code* code, FILE* file)
     fclose(file);
 }
 
+void check_tab_brk(fragment_code* code)
+{
+    char *s = code->symbol, *save = s;
+    fragment_code* save_code = code;
+    do {
+        if (*s == '=') {// проверка инициации массива
+            if (check_init(code, s)) {
+                while (1) {
+                    if (*s == ';' && check_q(code, s) && check_comment(code, s))
+                        break;
+                    if (!next_symbol(&code, &s))
+                        return;
+                }
+            }
+        }
+        save = s;
+        save_code = code;
+        if ((*s == 123 || *s == 125) && check_q(code, s) && check_comment(code, s)) {
+            while (previous_symbol(&code, &s)) {
+                if (*s != ' ' && *s != TAB) {
+                    if (*s != '\n') {
+                        past_symbol(save_code, save, '\n');
+                        next_symbol(&save_code, &save);
+                    }
+                    break;
+                }
+            }
+
+            s = save;
+            code = save_code;
+            while (next_symbol(&code, &s)) {
+                if (*s != ' ' && *s != TAB) {
+                    if (*s != '\n') {
+                        if (!next_symbol(&save_code, &save))
+                            return;
+                        past_symbol(save_code, save, '\n');
+                    }
+                    break;
+                }
+            }
+            s = save;
+            code = save_code;
+        }
+    } while (next_symbol(&code, &s));
+}
+
 void cformat(fragment_code* code)
 {
+    // check_op(code);
+    // for (int q = 0; q < 5; q++) printf("\n");
+    // for (int q = 0; q < 5; q++) printf("#");
+    // printf("  сheck_op  ");
+    // for (int q = 0; q < 5; q++) printf("#");
+    // printf("\n");
+    // // print_code(code);
+
+    // getchar();
+    // clean_tab(code);
+    // for (int q = 0; q < 5; q++) printf("\n");
+    // for (int q = 0; q < 5; q++) printf("#");
+    // printf("  clean_tab  ");
+    // for (int q = 0; q < 5; q++) printf("#");
+    // printf("\n");
+    // // print_code(code);
+
+    // getchar();
+    // // for (int q = 0; q < 5; q++) printf("#");
+    // check_tab_brk(code);
+    // cycle(code);
+    // for (int q = 0; q < 5; q++) printf("\n");
+    // for (int q = 0; q < 5; q++) printf("#");
+    // printf("  cycle  ");
+    // for (int q = 0; q < 5; q++) printf("#");
+    // printf("\n");
+    // // print_code(code);
+    
+    // getchar();
+    // add_tab(code);
+    // for (int q = 0; q < 5; q++) printf("\n");
+    // for (int q = 0; q < 5; q++) printf("#");
+    // printf("  add_tab  ");
+    // for (int q = 0; q < 5; q++) printf("#");
+    // printf("\n");
+
+
+    // add_shift_cycle(code);
+
     check_op(code);
-    printf("\n#check_op\n");
-    print_code(code);
-    getchar();
-    clean_tab(code);
-    printf("\n#clean_tab\n");
-    print_code(code);
-    getchar();
-    cycle(code);
-    printf("\n#cycle\n");
-    print_code(code);
-    getchar();
-    add_tab(code);
+    // clean_tab(code);
+    // check_tab_brk(code);
+    // cycle(code);
+    // add_tab(code);
 }

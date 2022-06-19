@@ -2,7 +2,7 @@ APP_NAME = cformat
 TEST_NAME = cformat-test
 LIB_NAME = lib
 
-CFLAGS = -w
+CFLAGS = -Wall
 CFLAGS_TEST = -I src -MMD
 CPPFLAGS = -I src -MP -MMD
 
@@ -11,13 +11,15 @@ OBJ_DIR = obj
 SRC_DIR = src
 TEST_DIR = test
 
-APP_PATH = $(BIN_DIR)/$(APP_NAME)
+#APP_PATH = $(BIN_DIR)/$(APP_NAME)
+APP_PATH = $(APP_NAME)
 LIB_PATH = $(OBJ_DIR)/$(SRC_DIR)/$(LIB_NAME)/$(LIB_NAME).a
+
 TEST_PATH = $(BIN_DIR)/$(TEST_NAME)
 TEST_OBJ_PATH = $(OBJ_DIR)/$(TEST_DIR)
 
 SRC_EXT = c
-APP_RUN = $(BIN_DIR)/./$(APP_NAME)
+APP_RUN = ./$(APP_NAME)
 TEST_CHECK = $(BIN_DIR)/./$(TEST_NAME)
 
 APP_SOURCES = $(shell find $(SRC_DIR)/$(APP_NAME) -name '*.$(SRC_EXT)')
@@ -57,8 +59,8 @@ clean:
 	rm -rf $(DEPS) $(APP_OBJECTS) $(LIB_OBJECTS)
 	
 .PHONY: run
-run: $(APP_RUN)
-	$(APP_RUN)
+run:
+	$(APP_RUN) main.c
 	
 .PHONY: rtest
 rtest: $(TEST_CHECK)

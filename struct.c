@@ -37,7 +37,3 @@ typedef struct {
     int open;
     int close;
 } code_info;
-
-#define AVAILABLE_SYMBOL(i, command) command[i] == ' ' || command[i] == TAB || command[i] == '{' || \
-            command[i] == '}' || command[i] == ';' || command[i] == '(' || \
-            command[i] == ')' || command[i] == TAB || command[i] == '\n'
